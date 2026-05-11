@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import {NavigateFunction, useNavigate} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../redux/Store";
-import {TOKEN} from "../config/Config";
+import {BASE_API_URL, TOKEN} from "../config/Config";
 import EditGroupChat from "./editChat/EditGroupChat";
 import Profile from "./profile/Profile";
 import CallModal from "./call/CallModal";
@@ -136,7 +136,7 @@ const Homepage = () => {
             Authorization: `${AUTHORIZATION_PREFIX}${token}`
         };
 
-        const socket: WebSocket = new SockJS("http://localhost:8080/ws");
+        const socket: WebSocket = new SockJS(`${BASE_API_URL}/ws`);
         const client: Client = over(socket);
         client.connect(headers, () => onConnect(client), onError);
         setStompClient(client);
