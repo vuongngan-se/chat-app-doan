@@ -1,20 +1,20 @@
 DELETE
-FROM MESSAGE_READ_BY;
+FROM message_read_by;
 DELETE
-FROM CHAT_MESSAGES;
+FROM chat_messages;
 DELETE
-FROM CHAT_ADMINS;
+FROM chat_admins;
 DELETE
-FROM CHAT_USERS;
+FROM chat_users;
 DELETE
-FROM MESSAGE;
+FROM message;
 DELETE
-FROM CHAT;
+FROM chat;
 DELETE
-FROM APP_USER;
+FROM app_user;
 
 
-INSERT INTO APP_USER(id, email, password, full_name, image)
+INSERT INTO app_user(id, email, password, full_name, image)
 VALUES ('be900497-cc68-4504-9b99-4e5deaf1e6c0', 'luke.skywalker@test.com',
         '$2a$12$y2uaorJLa.mxyJNUO2ThZ.OEvkKer/FCH49aOT/cY0qw6S2IFTPGK', 'Luke Skywalker', 'https://avatarfiles.alphacoders.com/264/264758.jpg'), -- Password: luke
        ('f290f384-60ba-4cdd-af96-26c88ede0264', 'darth.vader@test.com',
@@ -93,7 +93,7 @@ VALUES ('be900497-cc68-4504-9b99-4e5deaf1e6c0', 'luke.skywalker@test.com',
         '$2a$15$OXvN5.IxNhehhh.MiuenG.AGvYqnl3QXnRoxExr62B30J6eoJycHK', 'Ashoka Tano', NULL);
 
 
-INSERT INTO CHAT(id, chat_name, is_group, created_by_id)
+INSERT INTO chat(id, chat_name, is_group, created_by_id)
 VALUES ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'Darth Vader and Luke', false, 'f290f384-60ba-4cdd-af96-26c88ede0264'),
        ('c40e7df3-7e67-4955-96b5-25e8769ec9bc', 'Luke and Leia', false, 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
        ('ac63914e-151e-444f-b44c-f67a3374f1f1', 'The Goodies', true, 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
@@ -106,13 +106,13 @@ VALUES ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'Darth Vader and Luke', false, '
        ('fc38b854-69f6-49ee-aa51-da00ea5eb191', 'R2D2 and Luke', false, 'be900497-cc68-4504-9b99-4e5deaf1e6c0');
 
 
-INSERT INTO CHAT_ADMINS(admins_id, chat_id)
+INSERT INTO chat_admins(admins_id, chat_id)
 VALUES ('be900497-cc68-4504-9b99-4e5deaf1e6c0', 'ac63914e-151e-444f-b44c-f67a3374f1f1'),
        ('c419a854-010a-4a50-be82-f4587014d6e4', 'f476eee8-9a39-4fd2-906f-9e7a746ef167'),
        ('be900497-cc68-4504-9b99-4e5deaf1e6c0', '731ecf77-95b1-409c-8db8-a6f1aeb192bb');
 
 
-INSERT INTO CHAT_USERS(chat_id, users_id)
+INSERT INTO chat_users(chat_id, users_id)
 VALUES ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'f290f384-60ba-4cdd-af96-26c88ede0264'),
        ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
        ('c40e7df3-7e67-4955-96b5-25e8769ec9bc', 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
@@ -138,7 +138,7 @@ VALUES ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'f290f384-60ba-4cdd-af96-26c88ed
        ('fc38b854-69f6-49ee-aa51-da00ea5eb191', '605dd929-2fef-4fea-b2b9-9b16b74f71c2');
 
 
-INSERT INTO MESSAGE(id, content, time_stamp, user_id, chat_id)
+INSERT INTO message(id, content, time_stamp, user_id, chat_id)
 VALUES ('a284a44a-7b28-45da-8463-3a35417715f0', 'I am your father', '2024-04-22 20:01:07.535241',
         'f290f384-60ba-4cdd-af96-26c88ede0264', '0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4'),
        ('37afbdc4-89b4-4961-b825-bb4d666e5442', 'Noooo', '2024-04-22 20:02:08.535241',
@@ -195,7 +195,7 @@ VALUES ('a284a44a-7b28-45da-8463-3a35417715f0', 'I am your father', '2024-04-22 
         '605dd929-2fef-4fea-b2b9-9b16b74f71c2', 'fc38b854-69f6-49ee-aa51-da00ea5eb191');
 -- 'I ve got a bad feeling about this.'
 
-INSERT INTO CHAT_MESSAGES(chat_id, messages_id)
+INSERT INTO chat_messages(chat_id, messages_id)
 VALUES ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'a284a44a-7b28-45da-8463-3a35417715f0'),
        ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', '37afbdc4-89b4-4961-b825-bb4d666e5442'),
        ('c40e7df3-7e67-4955-96b5-25e8769ec9bc', '620d606a-9033-4210-b9c0-982e0f3800ef'),
@@ -220,7 +220,7 @@ VALUES ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'a284a44a-7b28-45da-8463-3a35417
        ('51b918c3-ea54-4079-b0b8-f5f7edd92eb9', '84eb294a-9e0a-4634-aaad-4cfde087cff0'),
        ('fc38b854-69f6-49ee-aa51-da00ea5eb191', 'b57bba0d-90f6-409e-a00b-c109bfbfce14');
 
-INSERT INTO MESSAGE_READ_BY(message_id, read_by)
+INSERT INTO message_read_by(message_id, read_by)
 VALUES ('08db069b-e3d5-4cff-b17e-b3af15bb667f', 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
        ('33d814e7-06fa-4dfc-a290-ccc4ca5664b2', 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
        ('84e38fc1-07cf-4083-b442-94d216a8320a', 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
