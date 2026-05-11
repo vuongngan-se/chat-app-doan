@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthorizationFilter, BasicAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration cfg = new CorsConfiguration();
-                    cfg.setAllowedOrigins(List.of("http://localhost:3000"));
+                    cfg.setAllowedOriginPatterns(Collections.singletonList("*"));
                     cfg.setAllowedMethods(Collections.singletonList("*"));
                     cfg.setAllowCredentials(true);
                     cfg.setAllowedHeaders(Collections.singletonList("*"));
