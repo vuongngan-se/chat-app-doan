@@ -31,7 +31,7 @@ public class Chat {
     @ManyToOne
     private User createdBy;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
     private List<Message> messages = new ArrayList<>();
 
     @Override

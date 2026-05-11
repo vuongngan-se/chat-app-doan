@@ -40,6 +40,8 @@ public class Message {
     private Chat chat;
 
     @ElementCollection
+    @CollectionTable(name = "message_read_by", joinColumns = @JoinColumn(name = "message_id"))
+    @Column(name = "read_by", nullable = false)
     private Set<UUID> readBy = new HashSet<>();
 
     @Override

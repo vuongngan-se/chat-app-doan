@@ -1,7 +1,6 @@
 DELETE
 FROM message_read_by;
-DELETE
-FROM chat_messages;
+
 DELETE
 FROM chat_admins;
 DELETE
@@ -195,30 +194,6 @@ VALUES ('a284a44a-7b28-45da-8463-3a35417715f0', 'I am your father', '2024-04-22 
         '605dd929-2fef-4fea-b2b9-9b16b74f71c2', 'fc38b854-69f6-49ee-aa51-da00ea5eb191');
 -- 'I ve got a bad feeling about this.'
 
-INSERT INTO chat_messages(chat_id, messages_id)
-VALUES ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', 'a284a44a-7b28-45da-8463-3a35417715f0'),
-       ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', '37afbdc4-89b4-4961-b825-bb4d666e5442'),
-       ('c40e7df3-7e67-4955-96b5-25e8769ec9bc', '620d606a-9033-4210-b9c0-982e0f3800ef'),
-       ('c40e7df3-7e67-4955-96b5-25e8769ec9bc', '15733d9e-939d-497b-b042-fd2fe54d7430'),
-       ('ac63914e-151e-444f-b44c-f67a3374f1f1', '6bd25bf8-dba1-46b1-8821-ba838d4a84ae'),
-       ('7d81a13c-e835-455a-bc99-3fb6001fb0d5', '08db069b-e3d5-4cff-b17e-b3af15bb667f'),
-       ('74397056-5ede-4533-8dfe-5d8367d588d2', '1b5bd428-9cc7-480b-8f8c-6cee22e6b76e'),
-       ('74397056-5ede-4533-8dfe-5d8367d588d2', '81c67b8c-51f4-46e3-b7eb-8c73db374a2d'),
-       ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', '15dcca4f-b7d1-4b55-be30-bf5950a770a1'),
-       ('0bd20a41-4d23-4c4e-a8aa-8e46743f9ee4', '2658df83-821a-4e4c-94a5-7fbc19249368'),
-       ('8a3ad4c8-3c57-43c3-aed7-f3af68da5135', '5c33a3a0-5598-42aa-8810-9408da913b3a'),
-       ('7d81a13c-e835-455a-bc99-3fb6001fb0d5', '33d814e7-06fa-4dfc-a290-ccc4ca5664b2'),
-       ('7d81a13c-e835-455a-bc99-3fb6001fb0d5', '84e38fc1-07cf-4083-b442-94d216a8320a'),
-       ('731ecf77-95b1-409c-8db8-a6f1aeb192bb', '14a8cd52-439d-4284-8c8e-2a1ca21e1d56'),
-       ('7d81a13c-e835-455a-bc99-3fb6001fb0d5', '7c27b77a-d4f6-4e5d-9ca9-1b68254def39'),
-       ('7d81a13c-e835-455a-bc99-3fb6001fb0d5', '0bd7a29b-8bb2-4a6c-8206-61f068e43b94'),
-       ('ac63914e-151e-444f-b44c-f67a3374f1f1', '72e84e37-a99a-4634-bac2-5f9c2f7c7975'),
-       ('ac63914e-151e-444f-b44c-f67a3374f1f1', '0e223052-e532-4c74-8efa-1c8fb7e8b49a'),
-       ('ac63914e-151e-444f-b44c-f67a3374f1f1', '6fc16add-dc1b-42b3-9942-82b52d47684e'),
-       ('ac63914e-151e-444f-b44c-f67a3374f1f1', '9230fbb8-5365-4409-baeb-47c3249b5d12'),
-       ('ac63914e-151e-444f-b44c-f67a3374f1f1', '85c6cb71-5770-4320-890f-43e70917dcaa'),
-       ('51b918c3-ea54-4079-b0b8-f5f7edd92eb9', '84eb294a-9e0a-4634-aaad-4cfde087cff0'),
-       ('fc38b854-69f6-49ee-aa51-da00ea5eb191', 'b57bba0d-90f6-409e-a00b-c109bfbfce14');
 
 INSERT INTO message_read_by(message_id, read_by)
 VALUES ('08db069b-e3d5-4cff-b17e-b3af15bb667f', 'be900497-cc68-4504-9b99-4e5deaf1e6c0'),
