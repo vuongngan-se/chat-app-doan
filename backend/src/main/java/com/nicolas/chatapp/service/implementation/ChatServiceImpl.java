@@ -165,9 +165,8 @@ public class ChatServiceImpl implements ChatService {
         Chat chat = findChatById(chatId);
 
         if (chat.getUsers().contains(reqUser)) {
-            chat.getMessages().forEach(msg -> msg.getReadBy().add(reqUser.getId()));
-
-            return chatRepository.save(chat);
+            chatRepository.markChatAsRead(chatId.toString(), reqUser.getId().toString());
+            return chat;
         }
 
 

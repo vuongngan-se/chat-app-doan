@@ -22,4 +22,9 @@ public interface ChatRepository extends JpaRepository<Chat, UUID> {
 
     @Query("SELECT c FROM Chat c JOIN FETCH c.users WHERE c.id = :chatId")
     Optional<Chat> findByIdWithUsers(@Param("chatId") UUID chatId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query(value = "INSERT IGNORE INTO message_read_by (message_id, read_by) SELECT id, :userId FROM message WHERE chat_id = :chatId", nativeQuery = true)
+    void markChatAsRead(@Param("chatId") String chatId, @Param("userId") String userId);
 }
