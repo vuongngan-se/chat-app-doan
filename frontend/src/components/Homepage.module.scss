@@ -1,0 +1,70 @@
+.outerContainer {
+  position: relative;
+}
+
+.innerContainer {
+  display: flex;
+  background-color: var(--bg-app);
+  height: 90vh;
+  width: 96vw;
+  margin-top: 5vh;
+  margin-left: 2vw;
+}
+
+.sideBarContainer {
+  width: 30%;
+  height: 100%;
+  background-color: var(--bg-sidebar);
+}
+
+.profileContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.sideBarInnerContainer {
+  width: 100%;
+}
+
+.navContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  height: 11vh;
+}
+
+.userInfoContainer {
+  display: flex;
+  align-items: center;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.optionsContainer {
+  display: flex;
+  align-items: center;
+}
+
+.searchContainer {
+  height: 9vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-chat-list);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.chatsContainer {
+  height: 70vh;
+  background-color: var(--bg-chat-list);
+  overflow-y: auto;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.messagesContainer {
+  width: 70%;
+}

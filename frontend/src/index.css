@@ -1,0 +1,43 @@
+:root {
+  --bg-main: cadetblue;
+  --bg-app: #f0f2f5;
+  --bg-sidebar: #e8e9ec;
+  --bg-chat-list: white;
+  --bg-message-content: rgb(243 244 246);
+  --bg-header: #e8e9ec;
+  --bg-footer: #f0f2f5;
+  --text-main: #000;
+  --border-color: #ddd;
+  --bg-chat-hover: #f5f5f5;
+}
+
+body.dark-mode {
+  --bg-main: #000;
+  --bg-app: #121212;
+  --bg-sidebar: #1e1e1e;
+  --bg-chat-list: #1a1a1a;
+  --bg-message-content: #121212;
+  --bg-header: #1e1e1e;
+  --bg-footer: #1e1e1e;
+  --text-main: #fff;
+  --border-color: #333;
+  --bg-chat-hover: #2c2c2c;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-width: 100vw;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+

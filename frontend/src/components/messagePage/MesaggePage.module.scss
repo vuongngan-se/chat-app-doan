@@ -1,0 +1,68 @@
+.outerMessagePageContainer {
+  width: 100%;
+  position: relative;
+}
+
+.messagePageHeaderContainer {
+  width: 100%;
+  background-color: var(--bg-header);
+  height: 11vh;
+  border-left: solid 1px var(--border-color);
+  box-sizing: border-box;
+}
+
+.messagePageInnerHeaderContainer {
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.messagePageHeaderNameContainer {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.75rem;
+}
+
+.messageContentContainer {
+  padding-left: 3rem;
+  padding-right: 3rem;
+  overflow-y: auto;
+  background-color: var(--bg-message-content);
+  height: 66vh;
+}
+
+.messageContentInnerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.footerContainer {
+  background-color: var(--bg-footer);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 13vh;
+}
+
+.innerFooterContainer {
+  width: 70%;
+}
+
+.emojiButton {
+  margin-right: 1rem;
+}
+
+.emojiOuterContainer {
+  position: relative;
+}
+
+.emojiContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-105%, -95.5%);
+  z-index: 1;
+}
