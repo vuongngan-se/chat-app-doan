@@ -39,6 +39,7 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
     const peerConnection = useRef<RTCPeerConnection | null>(null);
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
+    const remoteStreamRef = useRef<MediaStream>(new MediaStream());
     const pendingIceCandidatesRef = useRef(callState.pendingIceCandidates);
     
     useEffect(() => {
@@ -129,11 +130,17 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
 
         pc.ontrack = (event) => {
             console.log(`Remote track received: ${event.track.kind}`);
+            
+            // Robustly collect tracks into a single MediaStream
+            if (!remoteStreamRef.current.getTracks().includes(event.track)) {
+                remoteStreamRef.current.addTrack(event.track);
+            }
+
             if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = event.streams[0];
+                remoteVideoRef.current.srcObject = remoteStreamRef.current;
                 remoteVideoRef.current.play().catch(e => console.log("Remote video play error:", e));
             }
-            dispatch({ type: 'SET_REMOTE_STREAM', payload: event.streams[0] });
+            dispatch({ type: 'SET_REMOTE_STREAM', payload: remoteStreamRef.current });
         };
 
         pc.onsignalingstatechange = () => {
@@ -222,11 +229,13 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
     }, [callState.localStream, callState.remoteStream, callState.isAccepted]);
 
     const handleEndCall = () => {
-        if (peerConnection.current) peerConnection.current.close();
-        if (callState.localStream) callState.localStream.getTracks().forEach(t => t.stop());
-        sendSignal(callState.isAccepted ? 'CALL_END' : 'CALL_REJECT');
-        dispatch({ type: 'END_CALL' });
-    };
+            if (peerConnection.current) peerConnection.current.close();
+            if (callState.localStream) callState.localStream.getTracks().forEach(t => t.stop());
+            if (remoteStreamRef.current) remoteStreamRef.current.getTracks().forEach(t => t.stop());
+            remoteStreamRef.current = new MediaStream(); // Reset for next call
+            sendSignal(callState.isAccepted ? 'CALL_END' : 'CALL_REJECT');
+            dispatch({ type: 'END_CALL' });
+        };
 
     const handleAcceptCall = () => {
         dispatch({ type: 'ACCEPT_CALL' });
