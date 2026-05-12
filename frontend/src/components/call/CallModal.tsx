@@ -39,7 +39,11 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
     const peerConnection = useRef<RTCPeerConnection | null>(null);
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
+    const pendingIceCandidatesRef = useRef(callState.pendingIceCandidates);
     
+    useEffect(() => {
+        pendingIceCandidatesRef.current = callState.pendingIceCandidates;
+    }, [callState.pendingIceCandidates]);
     const [isMuted, setIsMuted] = React.useState(false);
     const [isVideoOff, setIsVideoOff] = React.useState(false);
 
@@ -76,6 +80,7 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
             dispatch({ type: 'SET_LOCAL_STREAM', payload: stream });
             if (localVideoRef.current) {
                 localVideoRef.current.srcObject = stream;
+                localVideoRef.current.play().catch(e => console.log("Local video play error:", e));
             }
             return stream;
         } catch (err) {
@@ -103,6 +108,7 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
             console.log(`Remote track received: ${event.track.kind}`);
             if (remoteVideoRef.current) {
                 remoteVideoRef.current.srcObject = event.streams[0];
+                remoteVideoRef.current.play().catch(e => console.log("Remote video play error:", e));
             }
             dispatch({ type: 'SET_REMOTE_STREAM', payload: event.streams[0] });
         };
@@ -131,9 +137,10 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
     }, [callState.isCalling, callState.incomingCall]);
 
     const processQueuedIceCandidates = () => {
-        if (peerConnection.current && peerConnection.current.remoteDescription && callState.pendingIceCandidates.length > 0) {
-            console.log(`Processing ${callState.pendingIceCandidates.length} queued ICE candidates`);
-            callState.pendingIceCandidates.forEach(candidate => {
+        const candidates = pendingIceCandidatesRef.current;
+        if (peerConnection.current && peerConnection.current.remoteDescription && candidates.length > 0) {
+            console.log(`Processing ${candidates.length} queued ICE candidates`);
+            candidates.forEach(candidate => {
                 peerConnection.current?.addIceCandidate(new RTCIceCandidate(candidate))
                     .catch(e => console.error("Error adding queued ice candidate", e));
             });
@@ -183,9 +190,11 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
     useEffect(() => {
         if (callState.localStream && localVideoRef.current) {
             localVideoRef.current.srcObject = callState.localStream;
+            localVideoRef.current.play().catch(e => console.log("Local video play error:", e));
         }
         if (callState.remoteStream && remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = callState.remoteStream;
+            remoteVideoRef.current.play().catch(e => console.log("Remote video play error:", e));
         }
     }, [callState.localStream, callState.remoteStream, callState.isAccepted]);
 
