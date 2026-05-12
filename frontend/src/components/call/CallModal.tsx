@@ -74,7 +74,9 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
             });
             console.log("Local media setup successful. Tracks:", stream.getTracks().map(t => t.kind));
             dispatch({ type: 'SET_LOCAL_STREAM', payload: stream });
-            if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = stream;
+            }
             return stream;
         } catch (err) {
             console.error("Error accessing media devices.", err);
@@ -99,6 +101,9 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
 
         pc.ontrack = (event) => {
             console.log(`Remote track received: ${event.track.kind}`);
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = event.streams[0];
+            }
             dispatch({ type: 'SET_REMOTE_STREAM', payload: event.streams[0] });
         };
 
