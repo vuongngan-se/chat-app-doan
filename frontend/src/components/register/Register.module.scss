@@ -2,35 +2,75 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
 }
 
 .innerContainer {
-  width: 30%;
+  width: 100%;
+  max-width: 450px;
   padding: 40px;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   background-color: white;
+  border-radius: 16px;
+
+  @media (max-width: 600px) {
+    padding: 30px 20px;
+  }
+}
+
+.formTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+  color: #1a202c;
 }
 
 .text {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
 }
 
 .textInput {
   width: 100%;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+
+  :global(.MuiOutlinedInput-root) {
+    border-radius: 10px;
+  }
 }
 
 .button {
-  margin-top: 16px;
+  margin-top: 24px;
   margin-bottom: 16px;
   width: 100%;
+
+  :global(.MuiButton-root) {
+    border-radius: 10px;
+    padding: 12px;
+    text-transform: none;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .bottomContainer {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 16px;
+  color: #718096;
+  font-size: 0.9rem;
+
+  button {
+    text-transform: none;
+    font-weight: 600;
+    margin-left: 4px;
+  }
 }

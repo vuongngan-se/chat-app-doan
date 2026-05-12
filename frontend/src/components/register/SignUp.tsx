@@ -62,6 +62,7 @@ const SignUp = () => {
         <div>
             <div className={styles.outerContainer}>
                 <div className={styles.innerContainer}>
+                    <h1 className={styles.formTitle}>Sign Up</h1>
                     <form onSubmit={onSubmit}>
                         <div>
                             <p className={styles.text}>Full Name</p>
