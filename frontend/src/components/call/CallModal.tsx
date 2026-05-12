@@ -88,25 +88,36 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
 
     const setupMedia = async () => {
         try {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                const stream = await navigator.mediaDevices.getUserMedia({
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("mediaDevices API not supported");
+            }
+            let stream: MediaStream;
+            try {
+                // Try to get exactly what was requested
+                stream = await navigator.mediaDevices.getUserMedia({
                     video: callState.callType === 'VIDEO',
                     audio: true
                 });
-                console.log("Local media setup successful. Tracks:", stream.getTracks().map(t => t.kind));
-                dispatch({ type: 'SET_LOCAL_STREAM', payload: stream });
-                if (localVideoRef.current) {
-                    localVideoRef.current.srcObject = stream;
-                    localVideoRef.current.play().catch(e => console.log("Local video play error:", e));
-                }
-                return stream;
-            } else {
-                throw new Error("mediaDevices API not supported (requires HTTPS/localhost)");
+            } catch (mediaErr: any) {
+                console.warn("Primary media request failed, trying audio only...", mediaErr);
+                // Fallback: If video fails (e.g. no webcam), try audio only
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: false,
+                    audio: true
+                });
+                alert("Could not access camera. Falling back to voice only.");
             }
+            
+            console.log("Local media setup successful. Tracks:", stream.getTracks().map(t => t.kind));
+            dispatch({ type: 'SET_LOCAL_STREAM', payload: stream });
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = stream;
+                localVideoRef.current.play().catch(e => console.log("Local video play error:", e));
+            }
+            return stream;
         } catch (err) {
-            console.error("Error accessing media devices.", err);
-            // Fallback for users without camera/mic or on HTTP: return empty stream
-            // so they can at least receive the other person's video/audio.
+            console.error("Total failure accessing media devices.", err);
+            // Final fallback: return empty stream so call still connects (receive-only)
             const emptyStream = new MediaStream();
             dispatch({ type: 'SET_LOCAL_STREAM', payload: emptyStream });
             return emptyStream;
