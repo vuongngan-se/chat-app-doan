@@ -87,20 +87,28 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
 
     const setupMedia = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: callState.callType === 'VIDEO',
-                audio: true
-            });
-            console.log("Local media setup successful. Tracks:", stream.getTracks().map(t => t.kind));
-            dispatch({ type: 'SET_LOCAL_STREAM', payload: stream });
-            if (localVideoRef.current) {
-                localVideoRef.current.srcObject = stream;
-                localVideoRef.current.play().catch(e => console.log("Local video play error:", e));
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: callState.callType === 'VIDEO',
+                    audio: true
+                });
+                console.log("Local media setup successful. Tracks:", stream.getTracks().map(t => t.kind));
+                dispatch({ type: 'SET_LOCAL_STREAM', payload: stream });
+                if (localVideoRef.current) {
+                    localVideoRef.current.srcObject = stream;
+                    localVideoRef.current.play().catch(e => console.log("Local video play error:", e));
+                }
+                return stream;
+            } else {
+                throw new Error("mediaDevices API not supported (requires HTTPS/localhost)");
             }
-            return stream;
         } catch (err) {
             console.error("Error accessing media devices.", err);
-            alert("Could not access Camera/Microphone. Please check permissions.");
+            // Fallback for users without camera/mic or on HTTP: return empty stream
+            // so they can at least receive the other person's video/audio.
+            const emptyStream = new MediaStream();
+            dispatch({ type: 'SET_LOCAL_STREAM', payload: emptyStream });
+            return emptyStream;
         }
     };
 
