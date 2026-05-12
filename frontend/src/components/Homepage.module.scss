@@ -9,12 +9,27 @@
   width: 96vw;
   margin-top: 5vh;
   margin-left: 2vw;
+
+  @media (max-width: 768px) {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+  }
 }
 
 .sideBarContainer {
   width: 30%;
   height: 100%;
   background-color: var(--bg-sidebar);
+
+  @media (max-width: 768px) {
+    width: 100%;
+    display: none; // Default hidden on mobile if chat is selected
+
+    &.showOnMobile {
+      display: block;
+    }
+  }
 }
 
 .profileContainer {
@@ -67,4 +82,13 @@
 
 .messagesContainer {
   width: 70%;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    display: none; // Default hidden on mobile if no chat is selected
+
+    &.showOnMobile {
+      display: block;
+    }
+  }
 }

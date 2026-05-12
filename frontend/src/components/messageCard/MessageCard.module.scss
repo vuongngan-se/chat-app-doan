@@ -2,13 +2,22 @@
   align-self: flex-end;
   margin-top: 1rem;
   max-width: 75%;
+
+  @media (max-width: 768px) {
+    max-width: 85%;
+  }
 }
 
 .othersMessage {
   align-self: flex-start;
   margin-top: 1rem;
   max-width: 75%;
+
+  @media (max-width: 768px) {
+    max-width: 85%;
+  }
 }
+
 
 .date {
   align-self: center;

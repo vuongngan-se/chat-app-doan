@@ -22,6 +22,7 @@ import {TOKEN} from "../../config/Config";
 import EmojiPicker from "emoji-picker-react";
 import MoodIcon from '@mui/icons-material/Mood';
 import {EmojiClickData} from "emoji-picker-react/dist/types/exposedTypes";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface MessagePageProps {
     chat: ChatDTO;
@@ -238,6 +239,9 @@ const MessagePage = (props: MessagePageProps) => {
             <div className={styles.messagePageHeaderContainer}>
                 <div className={styles.messagePageInnerHeaderContainer}>
                     <div className={styles.messagePageHeaderNameContainer}>
+                        <IconButton className={styles.backButton} onClick={() => props.setCurrentChat(null)} sx={{ display: { xs: 'block', md: 'none' }, mr: 1 }}>
+                            <ArrowBackIcon />
+                        </IconButton>
                         <Avatar sx={{
                             width: '2.5rem',
                             height: '2.5rem',

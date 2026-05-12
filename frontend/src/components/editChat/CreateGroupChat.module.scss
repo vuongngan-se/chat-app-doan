@@ -12,7 +12,18 @@
   color: white;
   padding-left: 2.5rem;
   padding-right: 2.5rem;
+
+  @media (max-width: 768px) {
+    height: 10vh;
+    padding-left: 1rem;
+    padding-right: 1rem;
+
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
 }
+
 
 .createGroupChatTextField {
   height: 10vh;

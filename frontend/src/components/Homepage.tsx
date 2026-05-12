@@ -275,7 +275,7 @@ const Homepage = () => {
         <div>
             <div className={styles.outerContainer}>
                 <div className={styles.innerContainer}>
-                    <div className={styles.sideBarContainer}>
+                    <div className={`${styles.sideBarContainer} ${!currentChat ? styles.showOnMobile : ""}`}>
                         {isShowCreateSingleChat &&
                             <CreateSingleChat setIsShowCreateSingleChat={setIsShowCreateSingleChat}/>}
                         {isShowCreateGroupChat &&
@@ -366,7 +366,7 @@ const Homepage = () => {
                                 </div>
                             </div>}
                     </div>
-                    <div className={styles.messagesContainer}>
+                    <div className={`${styles.messagesContainer} ${currentChat ? styles.showOnMobile : ""}`}>
                         {!currentChat && <WelcomePage reqUser={authState.reqUser}/>}
                         {currentChat && <MessagePage
                             chat={currentChat}
@@ -378,6 +378,7 @@ const Homepage = () => {
                             setIsShowEditGroupChat={setIsShowEditGroupChat}
                             setCurrentChat={setCurrentChat}/>}
                     </div>
+
                 </div>
                 {callState.isCalling && <CallModal stompClient={stompClient} isConnected={isConnected} />}
             </div>

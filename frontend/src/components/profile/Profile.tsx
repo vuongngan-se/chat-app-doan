@@ -107,7 +107,7 @@ const Profile = (props: ProfileProps) => {
             </div>
             <div className={styles.avatarContainer}>
                 <label htmlFor="file-input">
-                    <Avatar sx={{width: '12vw', height: '12vw', fontSize: '5vw', cursor: 'pointer'}} src={auth.reqUser?.image || undefined}>
+                    <Avatar sx={{width: { xs: '150px', md: '200px' }, height: { xs: '150px', md: '200px' }, fontSize: { xs: '3rem', md: '5rem' }, cursor: 'pointer'}} src={auth.reqUser?.image || undefined}>
                         {!auth.reqUser?.image && props.initials}
                     </Avatar>
                 </label>

@@ -8,13 +8,16 @@
 }
 
 .chatCardAvatarContainer {
-  width: 15%;
+  flex-shrink: 0;
   padding-left: 1rem;
+  margin-right: 0.5rem;
 }
 
 .chatCardContentContainer {
-  width: 85%;
+  flex-grow: 1;
+  min-width: 0; // Allow content to shrink and truncate if needed
 }
+
 
 .chatCardContentInnerContainer {
   display: flex;
@@ -28,6 +31,9 @@
   line-height: 1.75rem;
   margin-top: 0;
   margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chatCardSmallTextContainer {
@@ -35,4 +41,7 @@
   line-height: 1.25rem;
   margin-top: 0;
   margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

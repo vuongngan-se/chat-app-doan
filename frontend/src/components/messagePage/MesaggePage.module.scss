@@ -9,6 +9,11 @@
   height: 11vh;
   border-left: solid 1px var(--border-color);
   box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    height: 8vh;
+    border-left: none;
+  }
 }
 
 .messagePageInnerHeaderContainer {
@@ -22,6 +27,18 @@
   display: flex;
   align-items: center;
   padding: 1rem 1.75rem;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 1rem;
+    
+    p {
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 120px;
+    }
+  }
 }
 
 .messageContentContainer {
@@ -30,6 +47,12 @@
   overflow-y: auto;
   background-color: var(--bg-message-content);
   height: 66vh;
+
+  @media (max-width: 768px) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    height: calc(100vh - 16vh); // Adjust based on header and footer
+  }
 }
 
 .messageContentInnerContainer {
@@ -45,14 +68,27 @@
   align-items: center;
   justify-content: center;
   height: 13vh;
+
+  @media (max-width: 768px) {
+    height: 8vh;
+    padding: 0 0.5rem;
+  }
 }
 
 .innerFooterContainer {
   width: 70%;
+
+  @media (max-width: 768px) {
+    width: 90%;
+  }
 }
 
 .emojiButton {
   margin-right: 1rem;
+
+  @media (max-width: 768px) {
+    margin-right: 0.25rem;
+  }
 }
 
 .emojiOuterContainer {
@@ -65,4 +101,9 @@
   left: 50%;
   transform: translate(-105%, -95.5%);
   z-index: 1;
+
+  @media (max-width: 768px) {
+    transform: translate(-50%, -100%);
+    left: 100px;
+  }
 }
