@@ -72,6 +72,7 @@
   justify-content: center;
   flex-shrink: 0;
   height: 13vh;
+  position: relative;
 
   @media (max-width: 768px) {
     height: 8vh;
@@ -97,6 +98,10 @@
 
 .emojiOuterContainer {
   position: relative;
+
+  @media (max-width: 768px) {
+    position: static;
+  }
 }
 
 .emojiContainer {
@@ -104,10 +109,13 @@
   top: 50%;
   left: 50%;
   transform: translate(-105%, -95.5%);
-  z-index: 1;
+  z-index: 100;
 
   @media (max-width: 768px) {
-    transform: translate(-50%, -100%);
-    left: 100px;
+    top: auto;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
   }
 }
