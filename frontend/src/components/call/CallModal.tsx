@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {Avatar, Box, Button, IconButton, Modal, Typography} from "@mui/material";
+import {Avatar, Button, IconButton, Modal} from "@mui/material";
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import CallIcon from '@mui/icons-material/Call';
 import MicIcon from '@mui/icons-material/Mic';
@@ -9,22 +9,7 @@ import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../../redux/Store";
 import {Client} from "stompjs";
-import {WebSocketMessageDTO} from "../../redux/message/MessageModel";
-
-const style = {
-    position: 'absolute' as 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 600,
-    bgcolor: '#1a1a1a',
-    color: '#fff',
-    boxShadow: 24,
-    p: 0,
-    borderRadius: 4,
-    overflow: 'hidden',
-    textAlign: 'center'
-};
+import styles from './CallModal.module.scss';
 
 interface CallModalProps {
     stompClient: Client | null | undefined;
@@ -44,6 +29,7 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
     useEffect(() => {
         pendingIceCandidatesRef.current = callState.pendingIceCandidates;
     }, [callState.pendingIceCandidates]);
+    
     const [isMuted, setIsMuted] = React.useState(false);
     const [isVideoOff, setIsVideoOff] = React.useState(false);
 
@@ -116,107 +102,131 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
             return stream;
         } catch (err) {
             console.error("Total failure accessing media devices.", err);
-            // Final fallback: return empty stream so call still connects (receive-only)
-            const emptyStream = new MediaStream();
-            dispatch({ type: 'SET_LOCAL_STREAM', payload: emptyStream });
-            return emptyStream;
+            alert("WebRTC setup error: Microphone or camera access denied.");
+            handleEndCall();
         }
     };
 
-    const initPeerConnection = (stream: MediaStream) => {
-        console.log("Initializing PeerConnection...");
+    const createPeerConnection = (stream: MediaStream) => {
+        console.log("Creating RTCPeerConnection...");
         const pc = new RTCPeerConnection(configuration);
-        
+        peerConnection.current = pc;
+
+        // Add local tracks
         stream.getTracks().forEach(track => {
-            console.log("Adding local track to PC:", track.kind);
+            console.log("Adding track to PC:", track.kind);
             pc.addTrack(track, stream);
         });
 
+        // Set remote stream Ref
+        pc.ontrack = (event) => {
+            console.log("OnTrack event triggered. Tracks count:", event.streams[0]?.getTracks().length);
+            const remoteStream = event.streams[0];
+            dispatch({ type: 'SET_REMOTE_STREAM', payload: remoteStream });
+            if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = remoteStream;
+                remoteVideoRef.current.play().catch(e => console.log("Remote video play error:", e));
+            }
+        };
+
         pc.onicecandidate = (event) => {
             if (event.candidate) {
+                console.log("Generated local ICE Candidate:", event.candidate.candidate);
                 sendSignal('ICE_CANDIDATE', JSON.stringify(event.candidate));
             }
         };
 
-        pc.ontrack = (event) => {
-            console.log(`Remote track received: ${event.track.kind}`);
-            
-            const stream = event.streams[0];
-            if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = stream;
-                remoteVideoRef.current.play().catch(e => console.log("Remote video play error:", e));
+        pc.onconnectionstatechange = () => {
+            console.log("WebRTC Connection State changed to:", pc.connectionState);
+            if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+                console.warn("Connection lost. Terminating call.");
+                handleEndCall();
             }
-            dispatch({ type: 'SET_REMOTE_STREAM', payload: stream });
         };
 
-        pc.onsignalingstatechange = () => {
-            console.log("Signaling state changed to:", pc.signalingState);
-        };
-
-        peerConnection.current = pc;
         return pc;
     };
 
-    // Caller: Create Offer
-    useEffect(() => {
-        if (callState.isCalling && !callState.incomingCall && !callState.isAccepted) {
-            setupMedia().then(stream => {
-                if (stream) {
-                    const pc = initPeerConnection(stream);
-                    pc.createOffer().then(offer => {
-                        pc.setLocalDescription(offer);
-                        sendSignal('OFFER', JSON.stringify(offer));
-                    });
-                }
-            });
-        }
-    }, [callState.isCalling, callState.incomingCall]);
+    const startCallFlow = async () => {
+        const stream = await setupMedia();
+        if (!stream) return;
 
-    const processQueuedIceCandidates = () => {
-        const candidates = pendingIceCandidatesRef.current;
-        if (peerConnection.current && peerConnection.current.remoteDescription && candidates.length > 0) {
-            console.log(`Processing ${candidates.length} queued ICE candidates`);
-            candidates.forEach(candidate => {
-                peerConnection.current?.addIceCandidate(new RTCIceCandidate(candidate))
-                    .catch(e => console.error("Error adding queued ice candidate", e));
-            });
-            dispatch({ type: 'CLEAR_ICE_CANDIDATES' });
+        const pc = createPeerConnection(stream);
+        
+        console.log("Creating WebRTC Offer...");
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        console.log("Local Description Set successfully.");
+        sendSignal('OFFER', JSON.stringify(offer));
+    };
+
+    const acceptCallFlow = async () => {
+        const stream = await setupMedia();
+        if (!stream) return;
+
+        const pc = createPeerConnection(stream);
+
+        if (callState.pendingOffer) {
+            console.log("Setting remote description (Offer)...");
+            await pc.setRemoteDescription(new RTCSessionDescription(callState.pendingOffer));
+            
+            console.log("Creating WebRTC Answer...");
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+            sendSignal('ANSWER', JSON.stringify(answer));
+        } else {
+            console.warn("Offer was null, cannot accept WebRTC connection!");
         }
     };
 
-    // Receiver: Handle Offer
-    useEffect(() => {
-        if (callState.isAccepted && callState.pendingOffer && !peerConnection.current) {
-            setupMedia().then(stream => {
-                if (stream) {
-                    const pc = initPeerConnection(stream);
-                    pc.setRemoteDescription(new RTCSessionDescription(callState.pendingOffer))
-                        .then(() => {
-                            processQueuedIceCandidates();
-                            return pc.createAnswer();
-                        })
-                        .then(answer => {
-                            pc.setLocalDescription(answer);
-                            sendSignal('ANSWER', JSON.stringify(answer));
-                            dispatch({ type: 'SET_OFFER', payload: null }); // Clear processed offer
-                        })
-                        .catch(err => console.error("Error handling offer", err));
+    const processQueuedIceCandidates = async () => {
+        const pc = peerConnection.current;
+        if (pc && pc.remoteDescription && pendingIceCandidatesRef.current.length > 0) {
+            console.log(`Processing ${pendingIceCandidatesRef.current.length} queued remote ICE Candidates...`);
+            const candidates = [...pendingIceCandidatesRef.current];
+            dispatch({ type: 'CLEAR_ICE_CANDIDATES' });
+            
+            for (const candidate of candidates) {
+                try {
+                    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+                    console.log("Successfully added queued candidate.");
+                } catch (e) {
+                    console.error("Error adding queued candidate", e);
                 }
-            });
+            }
         }
-    }, [callState.isAccepted, callState.pendingOffer]);
+    };
 
-    // Caller: Handle Answer
+    // Caller Effect: Start Call WebRTC Flow
     useEffect(() => {
-        if (callState.pendingAnswer && peerConnection.current && peerConnection.current.signalingState === 'have-local-offer') {
-            peerConnection.current.setRemoteDescription(new RTCSessionDescription(callState.pendingAnswer))
-                .then(() => {
-                    processQueuedIceCandidates();
-                    dispatch({ type: 'SET_ANSWER', payload: null }); // Clear processed answer
-                })
-                .catch(err => console.error("Error setting remote answer", err));
+        if (callState.isCalling && !callState.incomingCall && !callState.isAccepted && !peerConnection.current) {
+            startCallFlow();
         }
-    }, [callState.pendingAnswer]);
+    }, [callState.isCalling]);
+
+    // Receiver Effect: Handle answer signaling
+    useEffect(() => {
+        const handleAnswerSignal = async () => {
+            const pc = peerConnection.current;
+            if (callState.isAccepted && !callState.incomingCall && callState.pendingAnswer && pc && !pc.remoteDescription) {
+                console.log("Setting remote description (Answer)...");
+                try {
+                    await pc.setRemoteDescription(new RTCSessionDescription(callState.pendingAnswer));
+                    await processQueuedIceCandidates();
+                } catch (e) {
+                    console.error("Failed to set remote description answer", e);
+                }
+            }
+        };
+        handleAnswerSignal();
+    }, [callState.isAccepted, callState.pendingAnswer]);
+
+    // Receiver Effect: Accept Call WebRTC Flow
+    useEffect(() => {
+        if (callState.isAccepted && callState.incomingCall && !peerConnection.current) {
+            acceptCallFlow();
+        }
+    }, [callState.isAccepted]);
 
     // Both: Handle ICE Candidates
     useEffect(() => {
@@ -270,71 +280,77 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
 
     return (
         <Modal open={true} onClose={handleEndCall}>
-            <Box sx={style}>
-                <Box sx={{ p: 3, bgcolor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="h6">
+            <div className={styles.callModalContainer}>
+                <div className={styles.callHeader}>
+                    <h6>
                         {callState.isAccepted ? "In Call" : (callState.incomingCall ? "Incoming Call..." : "Calling...")}
-                    </Typography>
-                    <Typography variant="body2" color="rgba(255,255,255,0.7)">
+                    </h6>
+                    <span className={styles.callTypeBadge}>
                         {callState.callType === 'VIDEO' ? "Video" : "Voice"}
-                    </Typography>
-                </Box>
+                    </span>
+                </div>
 
                 {callState.isAccepted ? (
-                    <Box sx={{ position: 'relative', height: 400, bgcolor: '#000' }}>
-                        <video ref={remoteVideoRef} autoPlay playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <Box sx={{ position: 'absolute', top: 20, right: 20, width: 150, height: 100, borderRadius: 2, overflow: 'hidden', border: '2px solid #fff', boxShadow: 3 }}>
-                            <video ref={localVideoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        </Box>
-                        <Box sx={{ position: 'absolute', bottom: 20, left: 20, display: 'flex', gap: 1, alignItems: 'center' }}>
-                            <Box sx={{ bgcolor: 'rgba(0,0,0,0.5)', px: 1.5, py: 0.5, borderRadius: 1 }}>
-                                <Typography variant="body2">{otherUser?.fullName}</Typography>
-                            </Box>
+                    <div className={styles.acceptedContainer}>
+                        <video ref={remoteVideoRef} autoPlay playsInline className={styles.remoteVideo} />
+                        <div className={styles.localVideoPip}>
+                            <video ref={localVideoRef} autoPlay playsInline muted className={styles.localVideo} />
+                        </div>
+                        <div className={styles.callOverlayDetails}>
+                            <div className={styles.otherUserNameBadge}>
+                                {otherUser?.fullName}
+                            </div>
                             <Button 
                                 size="small" 
-                                variant="contained" 
                                 onClick={() => remoteVideoRef.current?.play()}
-                                sx={{ bgcolor: 'rgba(255,255,255,0.2)', fontSize: '10px' }}
+                                className={styles.fixAudioBtn}
                             >
                                 Fix Audio
                             </Button>
-                        </Box>
-                    </Box>
+                        </div>
+                    </div>
                 ) : (
-                    <Box sx={{ py: 8 }}>
-                        <Avatar src={otherUser?.image || undefined} sx={{ width: 120, height: 120, margin: '0 auto 24px' }}>
-                            {otherUser?.fullName?.charAt(0)}
-                        </Avatar>
-                        <Typography variant="h4" gutterBottom>{otherUser?.fullName}</Typography>
-                        <Typography variant="h6" color="rgba(255,255,255,0.6)">{callState.callType === 'VIDEO' ? "Video Calling..." : "Voice Calling..."}</Typography>
-                    </Box>
+                    <div className={styles.ringingContainer}>
+                        <div className={styles.avatarWrapper}>
+                            <div className={styles.pulseCircle}></div>
+                            <div className={styles.pulseCircle}></div>
+                            <div className={styles.pulseCircle}></div>
+                            <Avatar src={otherUser?.image || undefined} className={styles.ringingAvatar}>
+                                {!otherUser?.image && otherUser?.fullName?.charAt(0)}
+                            </Avatar>
+                        </div>
+                        <h4 className={styles.callerName}>{otherUser?.fullName}</h4>
+                        <p className={styles.ringingStatus}>
+                            {callState.callType === 'VIDEO' ? "Video Calling..." : "Voice Calling..."}
+                        </p>
+                    </div>
                 )}
 
-                <Box sx={{ py: 3, display: 'flex', justifyContent: 'center', gap: 4, bgcolor: 'rgba(0,0,0,0.6)' }}>
+                <div className={styles.controlsDeck}>
                     {callState.incomingCall && !callState.isAccepted ? (
                         <>
-                            <IconButton onClick={handleAcceptCall} sx={{ bgcolor: '#4caf50', color: 'white', width: 64, height: 64, '&:hover': {bgcolor: '#388e3c'} }}>
+                            <IconButton onClick={handleAcceptCall} className={styles.acceptCallBtn}>
                                 <CallIcon fontSize="large" />
                             </IconButton>
-                            <IconButton onClick={handleEndCall} sx={{ bgcolor: '#f44336', color: 'white', width: 64, height: 64, '&:hover': {bgcolor: '#d32f2f'} }}>
+                            <IconButton onClick={handleEndCall} className={styles.declineCallBtn}>
                                 <CallEndIcon fontSize="large" />
                             </IconButton>
                         </>
                     ) : (
                         <>
-                            <IconButton onClick={toggleMute} sx={{ color: 'white', bgcolor: isMuted ? 'rgba(244,67,54,0.8)' : 'rgba(255,255,255,0.1)', '&:hover': {bgcolor: isMuted ? 'rgba(244,67,54,1)' : 'rgba(255,255,255,0.2)'} }}>
+                            <IconButton onClick={toggleMute} className={isMuted ? styles.mutedCallBtn : styles.standardCallBtn}>
                                 {isMuted ? <MicOffIcon /> : <MicIcon />}
                             </IconButton>
-                            <IconButton onClick={toggleVideo} sx={{ color: 'white', bgcolor: isVideoOff ? 'rgba(244,67,54,0.8)' : 'rgba(255,255,255,0.1)', '&:hover': {bgcolor: isVideoOff ? 'rgba(244,67,54,1)' : 'rgba(255,255,255,0.2)'} }}>
+                            <IconButton onClick={toggleVideo} className={isVideoOff ? styles.mutedCallBtn : styles.standardCallBtn}>
                                 {isVideoOff ? <VideocamOffIcon /> : <VideocamIcon />}
                             </IconButton>
-                            <IconButton onClick={handleEndCall} sx={{ bgcolor: '#f44336', color: 'white', width: 56, height: 56, '&:hover': {bgcolor: '#d32f2f'} }}>
+                            <IconButton onClick={handleEndCall} className={styles.declineCallBtn}>
                                 <CallEndIcon />
                             </IconButton>
                         </>
                     )}
-                </Box>
-            </Box>
+                </div>
+            </div>
         </Modal>
     );
 };

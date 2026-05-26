@@ -58,7 +58,6 @@
 .ownBubble {
   background: var(--bg-message-own);
   color: var(--text-message-own);
-  border-radius: 18px 18px 4px 18px;
   
   .senderName {
     color: rgba(255, 255, 255, 0.85);
@@ -83,7 +82,42 @@
 .othersBubble {
   background: var(--bg-message-other);
   color: var(--text-message-other);
-  border-radius: 18px 18px 18px 4px;
+}
+
+/* Grouping shapes for Own Bubbles */
+.ownBubbleSingle {
+  @extend .ownBubble;
+  border-radius: 18px 18px 18px 18px !important;
+}
+.ownBubbleFirst {
+  @extend .ownBubble;
+  border-radius: 18px 18px 4px 18px !important;
+}
+.ownBubbleMiddle {
+  @extend .ownBubble;
+  border-radius: 18px 4px 4px 18px !important;
+}
+.ownBubbleLast {
+  @extend .ownBubble;
+  border-radius: 18px 4px 18px 18px !important;
+}
+
+/* Grouping shapes for Others Bubbles */
+.othersBubbleSingle {
+  @extend .othersBubble;
+  border-radius: 18px 18px 18px 18px !important;
+}
+.othersBubbleFirst {
+  @extend .othersBubble;
+  border-radius: 18px 18px 18px 4px !important;
+}
+.othersBubbleMiddle {
+  @extend .othersBubble;
+  border-radius: 4px 18px 18px 4px !important;
+}
+.othersBubbleLast {
+  @extend .othersBubble;
+  border-radius: 4px 18px 18px 18px !important;
 }
 
 .senderName {
@@ -166,4 +200,157 @@
   opacity: 0.55;
   font-weight: 500;
   letter-spacing: 0.2px;
+}
+
+.bubbleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.reactTriggerContainer {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.messageRow:hover .reactTriggerContainer {
+  opacity: 1;
+}
+
+.reactTriggerBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background-color: var(--bg-chat-hover);
+    color: var(--text-main);
+  }
+}
+
+.reactionPickerFloating {
+  position: absolute;
+  bottom: 34px;
+  background: rgba(18, 20, 26, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+  animation: pickerEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  &.ownPicker {
+    right: 0;
+  }
+
+  &.othersPicker {
+    left: 0;
+  }
+}
+
+.pickerEmojiBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  &:hover {
+    transform: scale(1.3);
+  }
+}
+
+.pickerRemoveBtn {
+  background: rgba(255, 51, 102, 0.15);
+  border: none;
+  color: #ff3366;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 2px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 51, 102, 0.25);
+  }
+}
+
+.reactionsOverlay {
+  position: absolute;
+  bottom: -10px;
+  background: var(--bg-search-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2px 6px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: default;
+  z-index: 5;
+  user-select: none;
+}
+
+.ownReactionsOverlay {
+  right: 12px;
+}
+
+.othersReactionsOverlay {
+  left: 12px;
+}
+
+.reactionsList {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.reactionEmojiItem {
+  font-size: 0.8rem;
+}
+
+.reactionsCount {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.hasReactions {
+  margin-bottom: 10px !important;
+}
+
+@keyframes pickerEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

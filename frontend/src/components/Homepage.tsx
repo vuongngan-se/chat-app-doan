@@ -59,6 +59,19 @@ const Homepage = () => {
     const themeMode = useContext(ThemeModeContext);
     const open = Boolean(anchor);
 
+    const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+    const [reactionsMap, setReactionsMap] = useState<Record<string, Array<{userId: string, emoji: string, userName: string}>>>({});
+    const [typingMap, setTypingMap] = useState<Record<string, { [userId: string]: { userName: string, timestamp: number } }>>({});
+
+    const checkIsChatOnline = (chat: ChatDTO) => {
+        if (!chat.isGroup) {
+            const otherUser = chat.users.find(u => u.id !== authState.reqUser?.id);
+            return otherUser ? onlineUsers.has(otherUser.id) : false;
+        } else {
+            return chat.users.some(u => u.id !== authState.reqUser?.id && onlineUsers.has(u.id));
+        }
+    };
+
     useEffect(() => {
         if (token && !authState.reqUser) {
             dispatch(currentUser(token));
@@ -127,6 +140,77 @@ const Homepage = () => {
         setMessageReceived(false);
     }, [messageReceived]);
 
+    const broadcastStatus = (status: 'ONLINE' | 'OFFLINE') => {
+        if (stompClient && isConnected && authState.reqUser && chatState.chats) {
+            chatState.chats.forEach(chat => {
+                const msg = {
+                    messageType: 'USER_STATUS',
+                    content: status,
+                    chat: { id: chat.id },
+                    user: authState.reqUser
+                };
+                stompClient.send("/app/messages", {}, JSON.stringify(msg));
+            });
+        }
+    };
+
+    const sendReaction = (messageId: string, emoji: string) => {
+        if (stompClient && isConnected && authState.reqUser && currentChat) {
+            const reactionMsg = {
+                messageType: 'REACTION',
+                content: `${messageId}:${emoji}`,
+                chat: { id: currentChat.id },
+                user: authState.reqUser
+            };
+            stompClient.send("/app/messages", {}, JSON.stringify(reactionMsg));
+            
+            setReactionsMap(prev => {
+                const current = prev[messageId] || [];
+                const filtered = current.filter(r => r.userId !== authState.reqUser?.id);
+                if (emoji !== 'REMOVE') {
+                    filtered.push({ 
+                        userId: authState.reqUser!.id, 
+                        emoji, 
+                        userName: authState.reqUser!.fullName 
+                    });
+                }
+                return { ...prev, [messageId]: filtered };
+            });
+        }
+    };
+
+    const sendTypingStatus = (status: 'TYPING_START' | 'TYPING_STOP') => {
+        if (stompClient && isConnected && authState.reqUser && currentChat) {
+            const typingMsg = {
+                messageType: 'TYPING',
+                content: status,
+                chat: { id: currentChat.id },
+                user: authState.reqUser
+            };
+            stompClient.send("/app/messages", {}, JSON.stringify(typingMsg));
+        }
+    };
+
+    useEffect(() => {
+        if (isConnected && authState.reqUser && chatState.chats && chatState.chats.length > 0) {
+            const timer = setTimeout(() => {
+                broadcastStatus('ONLINE');
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [isConnected, chatState.chats?.length]);
+
+    useEffect(() => {
+        const handleUnload = () => {
+            broadcastStatus('OFFLINE');
+        };
+        window.addEventListener('beforeunload', handleUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleUnload);
+            broadcastStatus('OFFLINE');
+        };
+    }, [isConnected, stompClient]);
+
     useEffect(() => {
         connect();
     }, []);
@@ -164,6 +248,80 @@ const Homepage = () => {
                 myId: authState.reqUser?.id,
                 isDifferent: receivedMessage.user?.id !== authState.reqUser?.id
             });
+
+            if (receivedMessage.messageType === 'USER_STATUS') {
+                const userId = receivedMessage.user?.id;
+                if (userId && userId !== authState.reqUser?.id) {
+                    if (receivedMessage.content === 'ONLINE') {
+                        setOnlineUsers(prev => {
+                            const next = new Set(prev);
+                            next.add(userId);
+                            return next;
+                        });
+                        if (stompClient && isConnected && authState.reqUser) {
+                            const replyMsg = {
+                                messageType: 'USER_STATUS',
+                                content: 'ONLINE_REPLY',
+                                chat: { id: receivedMessage.chat?.id },
+                                user: authState.reqUser
+                            };
+                            stompClient.send("/app/messages", {}, JSON.stringify(replyMsg));
+                        }
+                    } else if (receivedMessage.content === 'ONLINE_REPLY') {
+                        setOnlineUsers(prev => {
+                            const next = new Set(prev);
+                            next.add(userId);
+                            return next;
+                        });
+                    } else if (receivedMessage.content === 'OFFLINE') {
+                        setOnlineUsers(prev => {
+                            const next = new Set(prev);
+                            next.delete(userId);
+                            return next;
+                        });
+                    }
+                }
+                return;
+            }
+
+            if (receivedMessage.messageType === 'TYPING') {
+                const chatId = receivedMessage.chat?.id;
+                const userId = receivedMessage.user?.id;
+                const userName = receivedMessage.user?.fullName;
+                if (chatId && userId && userName && userId !== authState.reqUser?.id) {
+                    setTypingMap(prev => {
+                        const chatTyping = { ...(prev[chatId] || {}) };
+                        if (receivedMessage.content === 'TYPING_START') {
+                            chatTyping[userId] = { userName, timestamp: Date.now() };
+                        } else {
+                            delete chatTyping[userId];
+                        }
+                        return { ...prev, [chatId]: chatTyping };
+                    });
+                }
+                return;
+            }
+
+            if (receivedMessage.messageType === 'REACTION') {
+                const parts = receivedMessage.content.split(':');
+                if (parts.length >= 2) {
+                    const messageId = parts[0];
+                    const emoji = parts[1];
+                    const userId = receivedMessage.user?.id;
+                    const userName = receivedMessage.user?.fullName;
+                    if (userId && userName) {
+                        setReactionsMap(prev => {
+                            const current = prev[messageId] || [];
+                            const filtered = current.filter(r => r.userId !== userId);
+                            if (emoji !== 'REMOVE') {
+                                filtered.push({ userId, emoji, userName });
+                            }
+                            return { ...prev, [messageId]: filtered };
+                        });
+                    }
+                }
+                return;
+            }
 
             if (receivedMessage.messageType === 'CALL_START' && receivedMessage.user?.id !== authState.reqUser?.id) {
                 dispatch({
@@ -358,7 +516,7 @@ const Homepage = () => {
                                                 x.users[0].fullName.toLowerCase().includes(query);
                                     }).map((chat: ChatDTO) => (
                                         <div key={chat.id} onClick={() => onClickChat(chat)}>
-                                            <ChatCard chat={chat} isActive={currentChat?.id === chat.id}/>
+                                            <ChatCard chat={chat} isActive={currentChat?.id === chat.id} isOnline={checkIsChatOnline(chat)}/>
                                         </div>
                                     ))}
                                 </div>
@@ -374,7 +532,12 @@ const Homepage = () => {
                             setNewMessage={setNewMessage}
                             onSendMessage={onSendMessage}
                             setIsShowEditGroupChat={setIsShowEditGroupChat}
-                            setCurrentChat={setCurrentChat}/>}
+                            setCurrentChat={setCurrentChat}
+                            onlineUsers={onlineUsers}
+                            reactionsMap={reactionsMap}
+                            sendReaction={sendReaction}
+                            typingUsers={typingMap[currentChat.id] || {}}
+                            sendTypingStatus={sendTypingStatus}/>}
                     </div>
 
                 </div>

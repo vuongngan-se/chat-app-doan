@@ -33,6 +33,11 @@ interface MessagePageProps {
     onSendMessage: () => void;
     setIsShowEditGroupChat: (isShowEditGroupChat: boolean) => void;
     setCurrentChat: (chat: ChatDTO | null) => void;
+    onlineUsers?: Set<string>;
+    reactionsMap?: Record<string, Array<{userId: string, emoji: string, userName: string}>>;
+    sendReaction?: (messageId: string, emoji: string) => void;
+    typingUsers?: { [userId: string]: { userName: string, timestamp: number } };
+    sendTypingStatus?: (status: 'TYPING_START' | 'TYPING_STOP') => void;
 }
 
 const MessagePage = (props: MessagePageProps) => {
@@ -47,6 +52,40 @@ const MessagePage = (props: MessagePageProps) => {
     const dispatch: AppDispatch = useDispatch();
     const open = Boolean(anchor);
     const token: string | null = localStorage.getItem(TOKEN);
+
+    const typingTimeoutRef = useRef<any>(null);
+    const lastSentTypingRef = useRef<number>(0);
+
+    const handleSendMessage = () => {
+        props.onSendMessage();
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+        props.sendTypingStatus?.('TYPING_STOP');
+        lastSentTypingRef.current = 0;
+    };
+
+    const onChangeNewMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIsEmojiPickerOpen(false);
+        props.setNewMessage(e.target.value);
+
+        if (props.sendTypingStatus) {
+            const now = Date.now();
+            if (now - lastSentTypingRef.current > 2000) {
+                props.sendTypingStatus('TYPING_START');
+                lastSentTypingRef.current = now;
+            }
+
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+
+            typingTimeoutRef.current = setTimeout(() => {
+                props.sendTypingStatus?.('TYPING_STOP');
+                lastSentTypingRef.current = 0;
+            }, 2000);
+        }
+    };
 
     useEffect(() => {
         scrollToBottom();
@@ -79,11 +118,6 @@ const MessagePage = (props: MessagePageProps) => {
         }
     };
 
-    const onChangeNewMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setIsEmojiPickerOpen(false);
-        props.setNewMessage(e.target.value);
-    };
-
     const onChangeMessageQuery = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setMessageQuery(e.target.value.toLowerCase());
     };
@@ -107,7 +141,7 @@ const MessagePage = (props: MessagePageProps) => {
 
     const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            props.onSendMessage();
+            handleSendMessage();
         }
     };
 
@@ -145,7 +179,21 @@ const MessagePage = (props: MessagePageProps) => {
     let lastMonth = -1;
     let lastYear = -1;
 
-    const getMessageCard = (message: MessageDTO) => {
+    const renderTypingIndicator = () => {
+        const typingList = Object.values(props.typingUsers || {});
+        if (typingList.length === 0) return null;
+        return (
+            <div className={styles.typingIndicatorWrapper}>
+                <div className={styles.typingBubble}>
+                    <div className={styles.typingDot}></div>
+                    <div className={styles.typingDot}></div>
+                    <div className={styles.typingDot}></div>
+                </div>
+            </div>
+        );
+    };
+
+    const getMessageCard = (message: MessageDTO, index: number, arr: MessageDTO[]) => {
         const date: Date = new Date(message.timeStamp);
         const isNewDate = lastDay !== date.getDate() || lastMonth !== date.getMonth() || lastYear !== date.getFullYear();
         if (isNewDate) {
@@ -153,8 +201,27 @@ const MessagePage = (props: MessagePageProps) => {
             lastMonth = date.getMonth();
             lastYear = date.getFullYear();
         }
-        return <MessageCard message={message} reqUser={props.reqUser} key={message.id} isNewDate={isNewDate}
-                            isGroup={props.chat.isGroup}/>
+
+        const prevMessage = index > 0 ? arr[index - 1] : null;
+        const isPrevSameSender = prevMessage && prevMessage.user.id === message.user.id && (+new Date(message.timeStamp) - +new Date(prevMessage.timeStamp) < 5 * 60 * 1000);
+        
+        const nextMessage = index < arr.length - 1 ? arr[index + 1] : null;
+        const isNextSameSender = nextMessage && nextMessage.user.id === message.user.id && (+new Date(nextMessage.timeStamp) - +new Date(message.timeStamp) < 5 * 60 * 1000);
+
+        const isFirstInGroup = !isPrevSameSender;
+        const isLastInGroup = !isNextSameSender;
+
+        return <MessageCard 
+                    message={message} 
+                    reqUser={props.reqUser} 
+                    key={message.id} 
+                    isNewDate={isNewDate}
+                    isGroup={props.chat.isGroup}
+                    reactions={props.reactionsMap?.[message.id] || []}
+                    onReact={(emoji: string) => props.sendReaction?.(message.id, emoji)}
+                    isFirstInGroup={isFirstInGroup}
+                    isLastInGroup={isLastInGroup}
+                />
     };
 
     const onStartCall = (type: 'VOICE' | 'VIDEO') => {
@@ -232,6 +299,12 @@ const MessagePage = (props: MessagePageProps) => {
 
     const chatImage = !props.chat.isGroup ? (props.chat.users[0].id === props.reqUser?.id ? props.chat.users[1].image : props.chat.users[0].image) : undefined;
 
+    const isOnline = !props.chat.isGroup && props.reqUser && props.onlineUsers
+        ? (props.chat.users.find(u => u.id !== props.reqUser?.id) ? props.onlineUsers.has(props.chat.users.find(u => u.id !== props.reqUser?.id)!.id) : false)
+        : (props.chat.isGroup && props.reqUser && props.onlineUsers
+            ? props.chat.users.some(u => u.id !== props.reqUser?.id && props.onlineUsers!.has(u.id))
+            : false);
+
     return (
         <div className={styles.outerMessagePageContainer}>
 
@@ -242,15 +315,21 @@ const MessagePage = (props: MessagePageProps) => {
                         <IconButton className={styles.backButton} onClick={() => props.setCurrentChat(null)} sx={{ display: { xs: 'block', md: 'none' }, mr: 1 }}>
                             <ArrowBackIcon />
                         </IconButton>
-                        <Avatar sx={{
-                            width: '2.5rem',
-                            height: '2.5rem',
-                            fontSize: '1rem',
-                            mr: '0.75rem'
-                        }} src={chatImage || undefined}>
-                            {!chatImage && getInitialsFromName(getChatName(props.chat, props.reqUser))}
-                        </Avatar>
-                        <p>{getChatName(props.chat, props.reqUser)}</p>
+                        <div style={{ position: 'relative' }}>
+                            <Avatar sx={{
+                                width: '2.5rem',
+                                height: '2.5rem',
+                                fontSize: '1rem',
+                                mr: '0.75rem'
+                            }} src={chatImage || undefined}>
+                                {!chatImage && getInitialsFromName(getChatName(props.chat, props.reqUser))}
+                            </Avatar>
+                            {isOnline && <div className={styles.onlineDot} />}
+                        </div>
+                        <div className={styles.headerTextInfo}>
+                            <p className={styles.headerUserName}>{getChatName(props.chat, props.reqUser)}</p>
+                            <span className={styles.headerUserStatus}>{isOnline ? "Active now" : "Offline"}</span>
+                        </div>
                     </div>
                     <div className={styles.messagePageHeaderNameContainer}>
                         <IconButton onClick={() => onStartCall('VOICE')}>
@@ -310,7 +389,8 @@ const MessagePage = (props: MessagePageProps) => {
                     .filter(x => x.id !== null && x.id !== undefined) // Ignore signaling messages with null ID
                     .sort((a, b) => +new Date(a.timeStamp) - +new Date(b.timeStamp))
                     .filter(x => messageQuery.length === 0 || x.content.toLowerCase().includes(messageQuery))
-                    .map(message => getMessageCard(message))}
+                    .map((message, index, arr) => getMessageCard(message, index, arr))}
+                {renderTypingIndicator()}
                 <div ref={lastMessageRef}></div>
             </div>
 
@@ -354,7 +434,7 @@ const MessagePage = (props: MessagePageProps) => {
                                     <IconButton onClick={onToggleListen} sx={{ color: isListening ? 'red' : 'inherit' }}>
                                         <MicIcon/>
                                     </IconButton>
-                                    <IconButton onClick={props.onSendMessage}>
+                                    <IconButton onClick={handleSendMessage}>
                                         <SendIcon/>
                                     </IconButton>
                                 </InputAdornment>),

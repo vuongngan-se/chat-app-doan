@@ -126,3 +126,16 @@
     box-shadow: 0 0 0 0 rgba(0, 106, 255, 0);
   }
 }
+
+.onlineDot {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 13px;
+  height: 13px;
+  background-color: #31a24c;
+  border-radius: 50%;
+  border: 2px solid var(--bg-sidebar);
+  box-shadow: 0 0 4px rgba(49, 162, 76, 0.4);
+  z-index: 10;
+}

@@ -10,6 +10,7 @@ import {MessageDTO} from "../../redux/message/MessageModel";
 interface ChatCardProps {
     chat: ChatDTO;
     isActive?: boolean;
+    isOnline?: boolean;
 }
 
 const ChatCard = (props: ChatCardProps) => {
@@ -48,7 +49,7 @@ const ChatCard = (props: ChatCardProps) => {
                 }} src={chatImage || undefined}>
                     {!chatImage && initials}
                 </Avatar>
-                {/* Optional online indicator dot if needed */}
+                {props.isOnline && <div className={styles.onlineDot} />}
             </div>
             <div className={styles.chatCardContentContainer}>
                 <div className={styles.chatCardHeaderRow}>
