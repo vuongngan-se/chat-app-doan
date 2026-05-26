@@ -12,11 +12,12 @@ const WelcomePage = (props: WelcomePageProps) => {
         <div className={styles.welcomeContainer}>
             <div className={styles.innerWelcomeContainer}>
                 <ForumIcon sx={{
-                    width: '10rem',
-                    height: '10rem',
+                    width: '7rem',
+                    height: '7rem',
                 }}/>
                 <h1>Welcome, {props.reqUser?.fullName}!</h1>
-                <p>Chat App designed and developed by Nicolas Justen.</p>
+                <p>Select a conversation from the sidebar or start a new chat to connect with friends instantly.</p>
+                <div className={styles.startHint}>Nicolas Messenger v2.0</div>
             </div>
         </div>
     );

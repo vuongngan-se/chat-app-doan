@@ -2,11 +2,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 3rem;
-  padding-right: 3rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  margin: 2px 6px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--bg-chat-hover);
+  }
+
+  button {
+    color: var(--accent-color);
+
+    &:hover {
+      background-color: var(--bg-sidebar);
+    }
+  }
 }
 
 .groupMemberAvatarContainer {
   display: flex;
   align-items: center;
+  min-width: 0; // Allow text truncation
+  flex-grow: 1;
+
+  p {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

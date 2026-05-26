@@ -342,13 +342,12 @@ const MessagePage = (props: MessagePageProps) => {
                     <TextField
                         id='newMessage'
                         type='text'
-                        label='Enter new message ...'
+                        placeholder='Aa'
                         size='small'
                         onKeyDown={onKeyDown}
                         fullWidth
                         value={props.newMessage}
                         onChange={onChangeNewMessage}
-                        sx={{ bgcolor: 'background.paper', borderRadius: 1 }}
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position='end'>

@@ -4,19 +4,22 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  background-color: var(--bg-message-content);
+  overflow: hidden;
 }
 
 .messagePageHeaderContainer {
   width: 100%;
   background-color: var(--bg-header);
   flex-shrink: 0;
-  height: 11vh;
-  border-left: solid 1px var(--border-color);
+  height: 70px;
+  border-bottom: 1px solid var(--border-color);
   box-sizing: border-box;
+  z-index: 5;
+  box-shadow: var(--shadow-sm);
 
   @media (max-width: 768px) {
-    height: 8vh;
-    border-left: none;
+    height: 60px;
   }
 }
 
@@ -25,43 +28,62 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 1.25rem;
+
+  @media (max-width: 768px) {
+    padding: 0 0.75rem;
+  }
 }
 
 .messagePageHeaderNameContainer {
   display: flex;
   align-items: center;
-  padding: 1rem 1.75rem;
+  gap: 0.25rem;
+
+  p {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+  }
 
   @media (max-width: 768px) {
-    padding: 0.5rem 1rem;
-
     p {
-      font-size: 0.9rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 120px;
+      font-size: 0.95rem;
+      max-width: 130px;
+    }
+  }
+
+  button {
+    color: var(--accent-color);
+    
+    &:hover {
+      background-color: var(--bg-chat-hover);
     }
   }
 }
 
+.backButton {
+  margin-right: 0.25rem !important;
+  color: var(--accent-color) !important;
+}
+
 .messageContentContainer {
-  padding-left: 3rem;
-  padding-right: 3rem;
+  padding: 1.5rem 2rem;
   overflow-y: auto;
   background-color: var(--bg-message-content);
   flex-grow: 1;
-
-  @media (max-width: 768px) {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-.messageContentInnerContainer {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 4px; /* Messenger-like tight spacing */
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 }
 
 .footerContainer {
@@ -69,53 +91,97 @@
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  box-sizing: border-box;
   flex-shrink: 0;
-  height: 13vh;
+  height: auto;
+  min-height: 60px;
+  border-top: 1px solid var(--border-color);
   position: relative;
+  gap: 0.5rem;
 
   @media (max-width: 768px) {
-    height: 8vh;
-    padding: 0 0.5rem;
-  }
-}
-
-.innerFooterContainer {
-  width: 70%;
-
-  @media (max-width: 768px) {
-    width: 90%;
+    padding: 0.5rem;
   }
 }
 
 .emojiButton {
-  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
 
-  @media (max-width: 768px) {
-    margin-right: 0.25rem;
+  button {
+    color: var(--accent-color);
+    
+    &:hover {
+      background-color: var(--bg-chat-hover);
+    }
+  }
+}
+
+.innerFooterContainer {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+
+  /* Restyle the Material UI input to look like the Aa Messenger pill */
+  :global(.MuiOutlinedInput-root) {
+    background-color: var(--bg-search-input);
+    border-radius: 24px !important;
+    border: none !important;
+    padding-right: 8px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--bg-chat-hover);
+    }
+
+    &.Mui-focused {
+      background-color: var(--bg-search-input);
+    }
+  }
+
+  :global(.MuiOutlinedInput-notchedOutline) {
+    border: none !important;
+  }
+
+  :global(.MuiInputAdornment-root) {
+    button {
+      color: var(--accent-color);
+      
+      &:hover {
+        background-color: var(--bg-chat-hover);
+      }
+    }
+  }
+  
+  :global(.MuiOutlinedInput-input) {
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    color: var(--text-main);
   }
 }
 
 .emojiOuterContainer {
   position: relative;
-
-  @media (max-width: 768px) {
-    position: static;
-  }
+  display: flex;
+  align-items: center;
 }
 
 .emojiContainer {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-105%, -95.5%);
+  bottom: calc(100% + 12px);
+  left: 0;
   z-index: 100;
+  box-shadow: var(--shadow-md);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
 
   @media (max-width: 768px) {
-    top: auto;
     bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
     z-index: 1000;
   }
 }

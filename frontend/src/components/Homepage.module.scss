@@ -1,33 +1,43 @@
 .outerContainer {
   position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--bg-app);
 }
 
 .innerContainer {
   display: flex;
   background-color: var(--bg-app);
-  height: 90vh;
-  width: 96vw;
-  margin-top: 5vh;
-  margin-left: 2vw;
-
-  @media (max-width: 768px) {
-    width: 100vw;
-    height: 100dvh;
-    margin: 0;
-  }
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .sideBarContainer {
   width: 30%;
+  min-width: 320px;
+  max-width: 420px;
   height: 100%;
   background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   @media (max-width: 768px) {
     width: 100%;
+    max-width: none;
+    min-width: 0;
     display: none; // Default hidden on mobile if chat is selected
+    border-right: none;
 
     &.showOnMobile {
-      display: block;
+      display: flex;
     }
   }
 }
@@ -35,61 +45,118 @@
 .profileContainer {
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  background-color: var(--bg-sidebar);
+  display: flex;
+  flex-direction: column;
 }
 
 .sideBarInnerContainer {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .navContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  height: 11vh;
+  padding: 1.25rem 1.25rem 0.5rem;
+  background-color: var(--bg-sidebar);
+  flex-shrink: 0;
 }
 
 .userInfoContainer {
   display: flex;
   align-items: center;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--bg-chat-hover);
+  }
+
+  p {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, var(--text-main) 0%, var(--accent-color) 150%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
 
 .optionsContainer {
   display: flex;
   align-items: center;
+  gap: 0.25rem;
 }
 
 .searchContainer {
-  height: 9vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--bg-chat-list);
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-sidebar);
+  flex-shrink: 0;
+
+  /* Style Material UI Textfield to look like a Messenger search bar */
+  :global(.MuiOutlinedInput-root) {
+    background-color: var(--bg-search-input);
+    border-radius: 50px !important;
+    border: none !important;
+    padding-left: 8px;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--bg-chat-hover);
+    }
+
+    &.Mui-focused {
+      background-color: var(--bg-sidebar);
+      box-shadow: 0 0 0 2px var(--accent-color);
+    }
+  }
+
+  :global(.MuiOutlinedInput-notchedOutline) {
+    border: none !important;
+  }
+  
+  :global(.MuiInputLabel-root) {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
 }
 
 .chatsContainer {
-  height: 70vh;
+  flex-grow: 1;
   background-color: var(--bg-chat-list);
   overflow-y: auto;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .messagesContainer {
-  width: 70%;
+  flex-grow: 1;
   height: 100%;
+  background-color: var(--bg-message-content);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
   @media (max-width: 768px) {
     width: 100%;
     display: none; // Default hidden on mobile if no chat is selected
 
     &.showOnMobile {
-      display: block;
+      display: flex;
     }
   }
 }

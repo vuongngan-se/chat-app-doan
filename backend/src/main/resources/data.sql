@@ -192,7 +192,6 @@ VALUES ('a284a44a-7b28-45da-8463-3a35417715f0', 'I am your father', '2024-04-22 
         'cd467a4d-8430-4545-ad3a-634ce007af46', '51b918c3-ea54-4079-b0b8-f5f7edd92eb9'),
        ('b57bba0d-90f6-409e-a00b-c109bfbfce14', 'Beep boop beep!', '2024-04-12 17:42:51.000000',
         '605dd929-2fef-4fea-b2b9-9b16b74f71c2', 'fc38b854-69f6-49ee-aa51-da00ea5eb191');
--- 'I ve got a bad feeling about this.'
 
 
 INSERT INTO message_read_by(message_id, read_by)

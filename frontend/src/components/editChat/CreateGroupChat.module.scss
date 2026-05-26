@@ -1,54 +1,115 @@
 .createGroupChatOuterContainer {
   width: 100%;
-  height: 90vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-sidebar);
+  overflow: hidden;
 }
 
 .createGroupChatNavContainer {
-  height: 15vh;
+  height: 70px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background-color: rgb(8 145 178);
-  color: white;
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
+  gap: 0.5rem;
+  background-color: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 1.25rem;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  button {
+    color: var(--accent-color);
+    
+    &:hover {
+      background-color: var(--bg-chat-hover);
+    }
+  }
+
+  h2 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-main);
+    letter-spacing: -0.3px;
+  }
 
   @media (max-width: 768px) {
-    height: 10vh;
-    padding-left: 1rem;
-    padding-right: 1rem;
-
-    h2 {
-      font-size: 1.25rem;
-    }
+    height: 60px;
   }
 }
 
-
 .createGroupChatTextField {
-  height: 10vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-sidebar);
+  flex-shrink: 0;
+
+  :global(.MuiOutlinedInput-root) {
+    background-color: var(--bg-search-input);
+    border-radius: 14px !important;
+    border: none !important;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--bg-chat-hover);
+    }
+
+    &.Mui-focused {
+      background-color: var(--bg-sidebar);
+      box-shadow: 0 0 0 2px var(--accent-color);
+    }
+  }
+
+  :global(.MuiOutlinedInput-notchedOutline) {
+    border: none !important;
+  }
 }
 
 .createGroupChatText {
-  height: 5vh;
-  padding-left: 1rem;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 1.25rem 0.25rem;
+  flex-shrink: 0;
 }
 
 .createGroupChatUserContainer {
-  height: 20vh;
+  flex-grow: 1;
   overflow-y: auto;
+  padding: 0.5rem;
+  background-color: var(--bg-chat-list);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .createGroupChatButton {
-  height: 10vh;
+  padding: 1rem 1.25rem;
+  background-color: var(--bg-sidebar);
+  border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+
+  :global(.MuiButton-root) {
+    width: 100%;
+    border-radius: 12px;
+    padding: 10px 20px;
+    text-transform: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    background: linear-gradient(135deg, #0084ff 0%, #00c6ff 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 132, 255, 0.2);
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 132, 255, 0.25);
+    }
+  }
 }

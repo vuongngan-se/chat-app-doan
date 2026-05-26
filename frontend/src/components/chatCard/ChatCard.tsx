@@ -1,4 +1,4 @@
-import {Avatar, Badge} from "@mui/material";
+import {Avatar} from "@mui/material";
 import React from "react";
 import {getChatName, getInitialsFromName, transformDateToString} from "../utils/Utils";
 import styles from './ChatCard.module.scss';
@@ -9,6 +9,7 @@ import {MessageDTO} from "../../redux/message/MessageModel";
 
 interface ChatCardProps {
     chat: ChatDTO;
+    isActive?: boolean;
 }
 
 const ChatCard = (props: ChatCardProps) => {
@@ -21,7 +22,7 @@ const ChatCard = (props: ChatCardProps) => {
     const lastMessage: MessageDTO | undefined = sortedMessages.length > 0 ? sortedMessages[sortedMessages.length - 1] : undefined;
     const lastMessageContent: string = lastMessage ? lastMessage.content.length > 25 ? lastMessage.content.slice(0, 25) + "..." : lastMessage.content : "";
     const lastMessageName: string = lastMessage ? lastMessage.user.fullName === authState.reqUser?.fullName ? "You" : lastMessage.user.fullName : "";
-    const lastMessageString: string = lastMessage ? lastMessageName + ": " + lastMessageContent : "";
+    const lastMessageString: string = lastMessage ? lastMessageName + ": " + lastMessageContent : "No messages yet";
     const lastDate: string = lastMessage ? transformDateToString(new Date(lastMessage.timeStamp)) : "";
     
     const numberOfReadMessages: number = props.chat.messages.filter(msg => {
@@ -31,29 +32,32 @@ const ChatCard = (props: ChatCardProps) => {
     }).length;
 
     const numberOfUnreadMessages: number = props.chat.messages.length - numberOfReadMessages;
+    const hasUnread = numberOfUnreadMessages > 0;
 
     const chatImage = !props.chat.isGroup && authState.reqUser ? (props.chat.users[0].id === authState.reqUser.id ? props.chat.users[1].image : props.chat.users[0].image) : undefined;
 
     return (
-        <div className={styles.chatCardOuterContainer}>
+        <div className={`${styles.chatCardOuterContainer} ${props.isActive ? styles.activeCard : ''}`}>
             <div className={styles.chatCardAvatarContainer}>
                 <Avatar sx={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    fontSize: '1rem',
-                    mr: '0.75rem'
+                    width: '3.2rem',
+                    height: '3.2rem',
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    bgcolor: props.isActive ? 'primary.main' : 'grey.400'
                 }} src={chatImage || undefined}>
                     {!chatImage && initials}
                 </Avatar>
+                {/* Optional online indicator dot if needed */}
             </div>
             <div className={styles.chatCardContentContainer}>
-                <div className={styles.chatCardContentInnerContainer}>
-                    <p className={styles.chatCardLargeTextContainer}>{name}</p>
-                    <p className={styles.chatCardSmallTextContainer}>{lastDate}</p>
+                <div className={styles.chatCardHeaderRow}>
+                    <p className={`${styles.chatCardLargeTextContainer} ${hasUnread ? styles.unreadText : ''}`}>{name}</p>
+                    <p className={`${styles.chatCardTimeText} ${hasUnread ? styles.unreadTime : ''}`}>{lastDate}</p>
                 </div>
-                <div className={styles.chatCardContentInnerContainer}>
-                    <p className={styles.chatCardSmallTextContainer}>{lastMessageString}</p>
-                    {<Badge badgeContent={numberOfUnreadMessages} color='primary' sx={{mr: '0.75rem'}}/>}
+                <div className={styles.chatCardMessageRow}>
+                    <p className={`${styles.chatCardSmallTextContainer} ${hasUnread ? styles.unreadMessage : ''}`}>{lastMessageString}</p>
+                    {hasUnread && <div className={styles.unreadDot} />}
                 </div>
             </div>
         </div>

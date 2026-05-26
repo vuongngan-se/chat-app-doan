@@ -1,9 +1,9 @@
 import {MessageDTO} from "../../redux/message/MessageModel";
 import {UserDTO} from "../../redux/auth/AuthModel";
 import styles from './MessageCard.module.scss';
-import {Chip, Box, IconButton, Slider, Typography} from "@mui/material";
+import {Box, IconButton, Slider, Typography, Avatar} from "@mui/material";
 import React, { useState, useRef } from "react";
-import {getDateFormat} from "../utils/Utils";
+import {getDateFormat, getInitialsFromName} from "../utils/Utils";
 import DownloadIcon from '@mui/icons-material/Download';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -21,7 +21,8 @@ const CustomAudioPlayer = ({ src, isDark }: { src: string, isDark: boolean }) =>
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
 
-    const togglePlay = () => {
+    const togglePlay = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (audioRef.current) {
             if (isPlaying) {
                 audioRef.current.pause();
@@ -95,48 +96,62 @@ const MessageCard = (props: MessageCardProps) => {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
 
-    const ownBg = isDark ? '#005c4b' : '#d3fdd3';
-    const otherBg = isDark ? '#202c33' : 'white';
-    const dateBg = isDark ? '#1e2b33' : '#faebd7';
-    const fileBg = isDark ? '#2a3942' : '#f0f0f0';
-
-    const label: React.ReactElement = (
-        <div className={styles.bubbleContainer}>
-            {props.isGroup && !isOwnMessage && <h4 className={styles.contentContainer}>{props.message.user.fullName}:</h4>}
-            {props.message.fileUrl && (
-                <div style={{marginBottom: '0.5rem'}}>
-                    {isImage(props.message.fileUrl) ? (
-                        <img src={props.message.fileUrl} alt="attachment" style={{maxWidth: '100%', borderRadius: '8px', display: 'block'}} />
-                    ) : isAudio(props.message.fileUrl) ? (
-                        <CustomAudioPlayer src={props.message.fileUrl} isDark={isDark} />
-                    ) : (
-                        <div style={{display: 'flex', alignItems: 'center', backgroundColor: fileBg, padding: '8px', borderRadius: '8px'}}>
-                            <span style={{marginRight: '8px', fontSize: '0.9rem'}}>{props.message.fileName}</span>
-                            <a href={props.message.fileUrl} download={props.message.fileName} style={{display: 'flex', color: 'inherit'}}>
-                                <DownloadIcon fontSize="small" />
-                            </a>
-                        </div>
-                    )}
-                </div>
-            )}
-            {(!props.message.fileUrl || !isAudio(props.message.fileUrl)) && (
-                <p className={styles.contentContainer}>{props.message.content}</p>
-            )}
-            <p className={styles.timeContainer}>{hours + ":" + minutes}</p>
-        </div>
-    );
-
-    const dateLabel: React.ReactElement = (
-      <p>{getDateFormat(date)}</p>
-    );
+    const initials = getInitialsFromName(props.message.user.fullName);
 
     return (
         <div className={styles.messageCardInnerContainer}>
-            {props.isNewDate && <div className={styles.date}>{<Chip label={dateLabel}
-                                                                    sx={{height: 'auto', width: 'auto', backgroundColor: dateBg}}/>}</div>}
-            <div className={isOwnMessage ? styles.ownMessage : styles.othersMessage}>
-                <Chip label={label}
-                      sx={{height: 'auto', width: 'auto', backgroundColor: isOwnMessage ? ownBg : otherBg, ml: '0.75rem'}}/>
+            {props.isNewDate && (
+                <div className={styles.date}>
+                    <span className={styles.dateLabel}>{getDateFormat(date)}</span>
+                </div>
+            )}
+            
+            <div className={`${styles.messageRow} ${isOwnMessage ? styles.ownMessageRow : styles.othersMessageRow}`}>
+                {!isOwnMessage && (
+                    <Avatar 
+                        sx={{ 
+                            width: '2rem', 
+                            height: '2rem', 
+                            fontSize: '0.8rem', 
+                            fontWeight: 'bold', 
+                            mr: '0.5rem', 
+                            alignSelf: 'flex-end',
+                            boxShadow: 'var(--shadow-sm)'
+                        }} 
+                        src={props.message.user.image || undefined}
+                    >
+                        {!props.message.user.image && initials}
+                    </Avatar>
+                )}
+                
+                <div className={`${styles.bubble} ${isOwnMessage ? styles.ownBubble : styles.othersBubble}`}>
+                    {props.isGroup && !isOwnMessage && (
+                        <div className={styles.senderName}>{props.message.user.fullName}</div>
+                    )}
+                    
+                    {props.message.fileUrl && (
+                        <div className={styles.fileContainer}>
+                            {isImage(props.message.fileUrl) ? (
+                                <img src={props.message.fileUrl} alt="attachment" className={styles.attachmentImg} />
+                            ) : isAudio(props.message.fileUrl) ? (
+                                <CustomAudioPlayer src={props.message.fileUrl} isDark={isDark} />
+                            ) : (
+                                <div className={styles.fileAttachment}>
+                                    <span className={styles.fileName}>{props.message.fileName}</span>
+                                    <a href={props.message.fileUrl} download={props.message.fileName} className={styles.fileDownloadLink}>
+                                        <DownloadIcon fontSize="small" />
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                    
+                    {(!props.message.fileUrl || !isAudio(props.message.fileUrl)) && (
+                        <p className={styles.messageContent}>{props.message.content}</p>
+                    )}
+                    
+                    <span className={styles.timestamp}>{hours + ":" + minutes}</span>
+                </div>
             </div>
         </div>
     );

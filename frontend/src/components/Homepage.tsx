@@ -358,11 +358,9 @@ const Homepage = () => {
                                                 x.users[0].fullName.toLowerCase().includes(query);
                                     }).map((chat: ChatDTO) => (
                                         <div key={chat.id} onClick={() => onClickChat(chat)}>
-                                            <Divider/>
-                                            <ChatCard chat={chat}/>
+                                            <ChatCard chat={chat} isActive={currentChat?.id === chat.id}/>
                                         </div>
                                     ))}
-                                    {chatState.chats?.length > 0 ? <Divider/> : null}
                                 </div>
                             </div>}
                     </div>

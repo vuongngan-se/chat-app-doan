@@ -1,47 +1,128 @@
 .chatCardOuterContainer {
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
   cursor: pointer;
-  margin-top: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin: 2px 4px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  text-decoration: none;
+  background-color: transparent;
+
+  &:hover {
+    background-color: var(--bg-chat-hover);
+  }
+
+  &.activeCard {
+    background-color: var(--bg-chat-active);
+
+    &:hover {
+      background-color: var(--bg-chat-active);
+    }
+    
+    .chatCardLargeTextContainer {
+      color: var(--text-main);
+    }
+  }
 }
 
 .chatCardAvatarContainer {
   flex-shrink: 0;
-  padding-left: 1rem;
-  margin-right: 0.5rem;
+  position: relative;
 }
 
 .chatCardContentContainer {
   flex-grow: 1;
-  min-width: 0; // Allow content to shrink and truncate if needed
+  min-width: 0; // Crucial for text ellipsis to work in nested flexbox
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 0.75rem;
 }
 
-
-.chatCardContentInnerContainer {
+.chatCardHeaderRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-right: 1rem;
+  align-items: baseline;
+  margin-bottom: 2px;
 }
 
 .chatCardLargeTextContainer {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  margin-top: 0;
-  margin-bottom: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-grow: 1;
+  padding-right: 0.5rem;
+
+  &.unreadText {
+    font-weight: 700;
+  }
+}
+
+.chatCardTimeText {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.unreadTime {
+    color: var(--accent-color);
+    font-weight: 600;
+  }
+}
+
+.chatCardMessageRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .chatCardSmallTextContainer {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  margin-top: 0;
-  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-grow: 1;
+  padding-right: 0.75rem;
+
+  &.unreadMessage {
+    font-weight: 700;
+    color: var(--text-main);
+  }
+}
+
+.unreadDot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+  box-shadow: 0 0 8px rgba(0, 106, 255, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 106, 255, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(0, 106, 255, 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 106, 255, 0);
+  }
 }
