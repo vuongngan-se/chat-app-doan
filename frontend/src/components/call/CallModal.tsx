@@ -169,6 +169,7 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
         if (callState.pendingOffer) {
             console.log("Setting remote description (Offer)...");
             await pc.setRemoteDescription(new RTCSessionDescription(callState.pendingOffer));
+            await processQueuedIceCandidates();
             
             console.log("Creating WebRTC Answer...");
             const answer = await pc.createAnswer();
@@ -223,10 +224,10 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
 
     // Receiver Effect: Accept Call WebRTC Flow
     useEffect(() => {
-        if (callState.isAccepted && callState.incomingCall && !peerConnection.current) {
+        if (callState.isAccepted && callState.pendingOffer && !peerConnection.current) {
             acceptCallFlow();
         }
-    }, [callState.isAccepted]);
+    }, [callState.isAccepted, callState.pendingOffer]);
 
     // Both: Handle ICE Candidates
     useEffect(() => {
@@ -276,7 +277,7 @@ const CallModal = ({ stompClient, isConnected }: CallModalProps) => {
 
     if (!callState.isCalling && !callState.incomingCall) return null;
 
-    const otherUser = callState.incomingCall ? callState.caller : callState.receiver;
+    const otherUser = callState.caller?.id === authState.reqUser?.id ? callState.receiver : callState.caller;
 
     return (
         <Modal open={true} onClose={handleEndCall}>
